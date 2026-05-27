@@ -13,7 +13,7 @@ Phase 1 (broadcast hub + Vercel deploy) is **shipped**. Live at:
 - **Production:** https://fusion-fashion-events-web.vercel.app
 - **Live page:** https://fusion-fashion-events-web.vercel.app/live
 - **Vercel project:** `kingbodhis-projects/fusion-fashion-events-web`
-- **GitHub:** https://github.com/Powerclub-Global/fusion-fashion-events-web
+- **GitHub:** https://github.com/KingBodhi/fusion-fashion-events-web (transferred from Powerclub-Global 2026-05-27 for Vercel auto-deploy convenience)
 
 The `/live` page renders an OFF AIR state by default and flips to LIVE NOW within ~10s of OBS connecting. Stream chain is fully working:
 
