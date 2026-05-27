@@ -12,6 +12,7 @@ export const siteConfig = {
     youtube: "https://www.youtube.com/channel/UCRhjjOiRUFD6_yveJImJAnw",
   },
   nav: [
+    { label: "Live", href: "/live" },
     { label: "Events", href: "/events" },
     { label: "Swim Week", href: "/swim-week" },
     { label: "Register", href: "/register" },
