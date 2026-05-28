@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ProductGallery } from "@/components/brands/ProductGallery";
 import { ProductCard } from "@/components/brands/ProductCard";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { buildMetadata } from "@/lib/metadata";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 
@@ -107,31 +108,23 @@ export default async function ProductDetailPage({
             )}
 
             <div className="mt-8 space-y-3">
-              {product.external_url ? (
+              <AddToCartButton
+                productId={product.id}
+                disabled={soldOut}
+                fullWidth
+              />
+              {product.external_url && !soldOut && (
                 <a
                   href={product.external_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`inline-flex items-center justify-center gap-2 w-full font-label tracking-widest text-xs uppercase px-8 py-4 transition-colors ${
-                    soldOut
-                      ? "border border-border text-muted-dark pointer-events-none opacity-60"
-                      : "bg-accent text-black hover:bg-accent-dim"
-                  }`}
+                  className="inline-flex items-center justify-center gap-2 w-full font-label tracking-widest text-xs uppercase px-8 py-4 border border-white/20 text-white hover:border-accent hover:text-accent transition-colors"
                 >
-                  {soldOut ? "Sold out" : "Shop now"}
-                  {!soldOut && <ExternalLink size={14} />}
+                  Shop on brand site <ExternalLink size={14} />
                 </a>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="w-full font-label tracking-widest text-xs uppercase px-8 py-4 border border-border text-muted-dark cursor-not-allowed"
-                >
-                  Inquiry only
-                </button>
               )}
               <p className="font-label tracking-widest text-[9px] text-muted-dark uppercase text-center">
-                Native checkout shipping in Phase 3
+                Native checkout via Stripe ships in Phase 3.2
               </p>
             </div>
           </div>

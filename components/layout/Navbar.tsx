@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { InstagramIcon, FacebookIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
+import { CartIcon } from "@/components/cart/CartIcon";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +63,8 @@ export function Navbar() {
         </ul>
 
         {/* CTA + Mobile Toggle */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
+          <CartIcon className="hidden md:inline-flex" />
           <Link
             href="/register"
             className="hidden lg:inline-flex items-center px-5 py-2 bg-accent text-black font-label tracking-widest text-xs uppercase rounded-none hover:bg-accent-dim transition-colors"

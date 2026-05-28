@@ -54,6 +54,7 @@ model Brand {
   products     Product[]
   segments     ShowSegment[]
   admins       AdminUser[]
+  order_items  OrderItem[]
 }
 
 model Product {
@@ -73,6 +74,8 @@ model Product {
   updated_at   DateTime @updatedAt
 
   pinned_in    PinnedProduct[]
+  cart_items   CartItem[]
+  order_items  OrderItem[]
 
   @@unique([brand_id, sku])
   @@index([brand_id, status])
@@ -142,4 +145,96 @@ model PinnedProduct {
   pinned_by    AdminUser? @relation(fields: [pinned_by_id], references: [id])
 
   @@index([show_id, unpinned_at])
+}
+
+// -- Cart + Checkout --------------------------------------------------------
+//
+// Phase 3.1 ships the cart UX + schema. Phase 3.2 wires Stripe Checkout +
+// webhook fulfillment writing to Order/OrderItem.
+
+model Customer {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  display_name  String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  carts         Cart[]
+  orders        Order[]
+}
+
+// One cart per cookie-keyed guest session. customer_id is set if/when the
+// guest claims the cart by signing in.
+model Cart {
+  id            String   @id @default(cuid())
+  customer_id   String?
+  customer      Customer? @relation(fields: [customer_id], references: [id])
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  items         CartItem[]
+
+  @@index([customer_id])
+}
+
+model CartItem {
+  id                    String   @id @default(cuid())
+  cart_id               String
+  cart                  Cart     @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  product_id            String
+  product               Product  @relation(fields: [product_id], references: [id])
+  quantity              Int      @default(1)
+  price_cents_snapshot  Int      // captured at add time so price changes don't move historical totals
+  currency_snapshot     String   @default("USD")
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  @@unique([cart_id, product_id])
+  @@index([cart_id])
+}
+
+model Order {
+  id                       String      @id @default(cuid())
+  customer_id              String?
+  customer                 Customer?   @relation(fields: [customer_id], references: [id])
+  email                    String       // captured even for guest checkout
+  total_cents              Int
+  currency                 String      @default("USD")
+  status                   OrderStatus @default(PENDING)
+  stripe_payment_intent_id String?     @unique
+  stripe_checkout_session  String?     @unique
+  shipping_address         Json?
+  created_at               DateTime    @default(now())
+  updated_at               DateTime    @updatedAt
+
+  items                    OrderItem[]
+
+  @@index([customer_id, status])
+  @@index([email])
+}
+
+enum OrderStatus {
+  PENDING       // checkout started, no payment yet
+  PAID          // payment captured
+  FULFILLED     // shipped / delivered
+  CANCELLED
+  REFUNDED
+}
+
+model OrderItem {
+  id                     String   @id @default(cuid())
+  order_id               String
+  order                  Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product_id             String
+  product                Product  @relation(fields: [product_id], references: [id])
+  brand_id               String
+  brand                  Brand    @relation(fields: [brand_id], references: [id])
+  product_name_snapshot  String
+  product_sku_snapshot   String
+  quantity               Int
+  unit_price_cents       Int
+  currency               String   @default("USD")
+
+  @@index([order_id])
+  @@index([brand_id])
 }
