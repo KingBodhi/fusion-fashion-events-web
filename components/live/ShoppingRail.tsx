@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { ShoppingBag, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
 import type { LivePinnedProduct } from "@/lib/live-state";
 
 function fmtPrice(cents: number, currency: string) {
@@ -86,25 +87,16 @@ export function ShoppingRail({
               )}
 
               <div className="mt-3">
-                {p.product.external_url ? (
-                  <a
-                    href={p.product.external_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1.5 font-label tracking-widest text-[10px] uppercase px-3 py-1.5 transition-colors ${
-                      soldOut
-                        ? "border border-border text-muted-dark pointer-events-none opacity-60"
-                        : "bg-accent text-black hover:bg-accent-dim"
-                    }`}
-                  >
-                    {soldOut ? "Sold out" : "Shop"}
-                    {!soldOut && <ExternalLink size={11} />}
-                  </a>
-                ) : (
-                  <span className="font-label tracking-widest text-[10px] uppercase text-muted-dark">
-                    Inquiry-only
-                  </span>
-                )}
+                <Link
+                  href={`/brands/${p.product.brand.slug}/${p.product.id}`}
+                  className={`inline-flex items-center gap-1.5 font-label tracking-widest text-[10px] uppercase px-3 py-1.5 transition-colors ${
+                    soldOut
+                      ? "border border-border text-muted-dark pointer-events-none opacity-60"
+                      : "bg-accent text-black hover:bg-accent-dim"
+                  }`}
+                >
+                  {soldOut ? "Sold out" : "Shop the look"}
+                </Link>
               </div>
             </div>
           </article>

@@ -1,8 +1,23 @@
 import Link from "next/link";
-import { featuredBrands } from "@/config/live";
+import Image from "next/image";
+import { prisma } from "@/lib/prisma";
 import { ChevronRight } from "lucide-react";
 
-export function BrandCTARail() {
+export async function BrandCTARail() {
+  const brands = await prisma.brand.findMany({
+    orderBy: { name: "asc" },
+    take: 6,
+    include: {
+      _count: {
+        select: {
+          products: { where: { status: { in: ["ACTIVE", "SOLD_OUT"] } } },
+        },
+      },
+    },
+  });
+
+  if (brands.length === 0) return null;
+
   return (
     <section className="py-16 px-6 max-w-7xl mx-auto">
       <div className="flex items-end justify-between mb-8">
@@ -11,7 +26,7 @@ export function BrandCTARail() {
             Shop the broadcast
           </p>
           <h2 className="font-display font-light text-3xl md:text-4xl text-white">
-            Featured brands tonight
+            Featured brands
           </h2>
         </div>
         <Link
@@ -23,22 +38,40 @@ export function BrandCTARail() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {featuredBrands.map((brand) => (
+        {brands.slice(0, 3).map((brand) => (
           <Link
-            key={brand.slug}
-            href={brand.href}
-            className="group border border-border hover:border-accent bg-surface p-6 transition-colors block"
+            key={brand.id}
+            href={`/brands/${brand.slug}`}
+            className="group border border-border hover:border-accent bg-surface transition-colors block overflow-hidden"
           >
-            <p className="font-label tracking-widest text-[10px] text-muted-dark uppercase mb-3">
-              Brand
-            </p>
-            <h3 className="font-display text-2xl text-white mb-2 group-hover:text-accent transition-colors">
-              {brand.name}
-            </h3>
-            <p className="text-muted-dark text-sm leading-relaxed mb-6">{brand.tagline}</p>
-            <span className="inline-flex items-center gap-1 font-label tracking-widest text-[10px] text-accent uppercase">
-              Shop now <ChevronRight size={12} />
-            </span>
+            {brand.hero_image && (
+              <div className="relative aspect-[3/2] bg-black border-b border-border overflow-hidden">
+                <Image
+                  src={brand.hero_image}
+                  alt={brand.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  unoptimized
+                />
+              </div>
+            )}
+            <div className="p-6">
+              <p className="font-label tracking-widest text-[10px] text-muted-dark uppercase mb-3">
+                Brand
+              </p>
+              <h3 className="font-display text-2xl text-white mb-2 group-hover:text-accent transition-colors">
+                {brand.name}
+              </h3>
+              {brand.tagline && (
+                <p className="text-muted-dark text-sm leading-relaxed mb-6 line-clamp-2">
+                  {brand.tagline}
+                </p>
+              )}
+              <span className="inline-flex items-center gap-1 font-label tracking-widest text-[10px] text-accent uppercase">
+                {brand._count.products > 0 ? "Shop now" : "View brand"} <ChevronRight size={12} />
+              </span>
+            </div>
           </Link>
         ))}
       </div>

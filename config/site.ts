@@ -13,6 +13,7 @@ export const siteConfig = {
   },
   nav: [
     { label: "Live", href: "/live" },
+    { label: "Brands", href: "/brands" },
     { label: "Events", href: "/events" },
     { label: "Swim Week", href: "/swim-week" },
     { label: "Register", href: "/register" },
