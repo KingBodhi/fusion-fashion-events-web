@@ -1,0 +1,145 @@
+// Fusion Fashion Events — Phase 1.5 schema
+//
+// Foundation for the live shopping platform: brands, products, scheduled shows,
+// and live-pinned products during a broadcast. Designed to extend cleanly into
+// Phase 2 (brand pages), Phase 3 (checkout + orders), and Phase 4 (AI-assisted
+// pinning + Shopify import).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+// -- Auth -------------------------------------------------------------------
+
+model AdminUser {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password_hash String
+  display_name  String?
+  role          AdminRole @default(OPERATOR)
+  brand_id      String?                       // null = full access; set = brand-scoped
+  brand         Brand?    @relation(fields: [brand_id], references: [id])
+  created_at    DateTime @default(now())
+  last_login_at DateTime?
+  pinned        PinnedProduct[]
+}
+
+enum AdminRole {
+  OWNER       // full platform access (Sirak, FFE staff)
+  OPERATOR    // can run shows, pin products
+  DESIGNER    // brand-scoped: manage own products + view own show metrics
+}
+
+// -- Brands + Products ------------------------------------------------------
+
+model Brand {
+  id           String   @id @default(cuid())
+  slug         String   @unique               // "tony-visions"
+  name         String
+  tagline      String?
+  bio          String?  @db.Text
+  hero_image   String?                        // hero/cover image URL
+  logo         String?                        // square logo
+  instagram    String?
+  website      String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  products     Product[]
+  segments     ShowSegment[]
+  admins       AdminUser[]
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  brand_id     String
+  brand        Brand    @relation(fields: [brand_id], references: [id], onDelete: Cascade)
+  sku          String
+  name         String
+  description  String?  @db.Text
+  price_cents  Int
+  currency     String   @default("USD")
+  image_urls   String[]                       // first is primary
+  inventory    Int?                           // null = unlimited / made-to-order
+  external_url String?                        // Phase 1.5: link out until checkout ships
+  status       ProductStatus @default(DRAFT)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  pinned_in    PinnedProduct[]
+
+  @@unique([brand_id, sku])
+  @@index([brand_id, status])
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  SOLD_OUT
+  ARCHIVED
+}
+
+// -- Shows + Live Pinning ---------------------------------------------------
+
+model Show {
+  id              String   @id @default(cuid())
+  slug            String   @unique             // "fusion-swim-week-2026-night-3"
+  title           String
+  subtitle        String?
+  hero_image      String?
+  live_input_id   String                       // Cloudflare Stream Live Input UID
+  starts_at       DateTime
+  ends_at         DateTime?
+  status          ShowStatus @default(SCHEDULED)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  segments        ShowSegment[]
+  pinned_products PinnedProduct[]
+
+  @@index([status, starts_at])
+}
+
+enum ShowStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+}
+
+model ShowSegment {
+  id           String   @id @default(cuid())
+  show_id      String
+  show         Show     @relation(fields: [show_id], references: [id], onDelete: Cascade)
+  brand_id     String
+  brand        Brand    @relation(fields: [brand_id], references: [id])
+  starts_at    DateTime                        // planned start
+  duration_s   Int      @default(900)          // 15 min default block
+  order        Int
+  notes        String?
+
+  @@unique([show_id, order])
+  @@index([show_id])
+}
+
+// One row per (show, product) pin event. unpinned_at = null means "currently pinned".
+// Multiple products can be pinned simultaneously.
+model PinnedProduct {
+  id           String   @id @default(cuid())
+  show_id      String
+  show         Show     @relation(fields: [show_id], references: [id], onDelete: Cascade)
+  product_id   String
+  product      Product  @relation(fields: [product_id], references: [id])
+  look_number  Int?
+  pinned_at    DateTime @default(now())
+  unpinned_at  DateTime?
+  pinned_by_id String?
+  pinned_by    AdminUser? @relation(fields: [pinned_by_id], references: [id])
+
+  @@index([show_id, unpinned_at])
+}
