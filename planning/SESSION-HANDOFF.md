@@ -11,7 +11,19 @@
 **Phase 1** (broadcast hub + Vercel deploy) is shipped.
 **Phase 1.5** (live shopping platform) is **SHIPPED**. Admin can create brands + products + shows + segments, mark a show live, and pin products in real time from the cockpit at /admin/shows/[id]/control. The public /live page subscribes to the SSE stream and surfaces pinned products in the shopping rail, plus a lineup widget that ticks Now/Up Next/Done state and an editorial off-air hero with countdown + replays grid.
 
-One scope adjustment: **viewer count** was deferred to Phase 2 (needs Cloudflare Analytics API integration; LineupWidget shipped as the rest of task 24).
+**Phase 2** (brand pages) shipped: /brands directory + /brands/[slug] + /brands/[slug]/[productId].
+**Image upload** via Vercel Blob shipped (drag-drop in BrandForm + ProductForm).
+**Phase 3.1** (cart foundation) shipped: schema + cookie session + /cart page + AddToCart button + navbar cart icon. Checkout intentionally stubbed until Phase 3.2 wires Stripe.
+
+**ARCHITECTURAL PIVOT (2026-05-28):** Aaren clarified during Phase 2.5 planning that brand/designer/product/content catalog ownership should move to **pcg-cc-mcp** (agency operations hub) rather than continuing to live in fusion-fashion-events-web. The FFE admin shipped here is now treated as a **placeholder** for fast self-service; the canonical store will be in pcg-cc-mcp under the FFE tenant.
+
+Implications for next session:
+- Do NOT extend the FFE admin (brands/products/shows) as canonical — extend pcg-cc-mcp instead
+- Three integration shapes to weigh: shared Neon DB across both apps, REST/GraphQL pull, or event-driven webhooks
+- Vision includes: Designers + Models + Brand-Model fit + Content competitions + Media operator pipeline (raw dumps → Editron post-production → delivery). All belong in pcg-cc-mcp.
+- See `~/.claude/projects/-Users-sirakstudios-topos/memory/project_ffe_pcg_integration.md` for the canonical decision record.
+
+One scope adjustment from earlier: **viewer count** was deferred (needs Cloudflare Analytics API integration; LineupWidget shipped as the rest of task 24).
 
 Phase 1 originally lived at:
 
