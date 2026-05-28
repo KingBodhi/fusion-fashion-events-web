@@ -9,7 +9,9 @@
 ## TL;DR — Where we are right now (updated 2026-05-28)
 
 **Phase 1** (broadcast hub + Vercel deploy) is shipped.
-**Phase 1.5** (live shopping foundation) is **~70% complete** — auth + schema + brands/products CRUD + shows + segments + live pinning dashboard all built and deployed. Remaining: SSE endpoint + frontend live shopping rail + editorial off-air state + lineup widget + viewer count.
+**Phase 1.5** (live shopping platform) is **SHIPPED**. Admin can create brands + products + shows + segments, mark a show live, and pin products in real time from the cockpit at /admin/shows/[id]/control. The public /live page subscribes to the SSE stream and surfaces pinned products in the shopping rail, plus a lineup widget that ticks Now/Up Next/Done state and an editorial off-air hero with countdown + replays grid.
+
+One scope adjustment: **viewer count** was deferred to Phase 2 (needs Cloudflare Analytics API integration; LineupWidget shipped as the rest of task 24).
 
 Phase 1 originally lived at:
 
@@ -59,7 +61,7 @@ This is a **multi-week build**. Don't rush ahead of the phasing.
 - [x] Simulcast destination rail + brand CTA rail (placeholder data)
 - [x] Nav updated with "Live" entry
 
-### Phase 1.5 — Live shopping platform (IN PROGRESS)
+### Phase 1.5 — Live shopping platform (SHIPPED)
 
 - [x] Neon Postgres via Vercel Marketplace (`neon-pink-envelope` resource)
 - [x] Prisma 6 schema: Brand, Product, Show, ShowSegment, PinnedProduct, AdminUser + enums
@@ -70,11 +72,22 @@ This is a **multi-week build**. Don't rush ahead of the phasing.
 - [x] Admin: brands CRUD + products CRUD with status enum (DRAFT/ACTIVE/SOLD_OUT/ARCHIVED)
 - [x] Admin: shows + segments (per-brand lineup blocks)
 - [x] Admin: /admin/shows/[id]/control — live pinning cockpit (mobile-first)
-- [ ] SSE endpoint at /api/live/[showId]/stream emitting pin changes
-- [ ] Frontend live shopping rail on /live (subscribes to SSE)
-- [ ] Editorial off-air state with countdown + replays grid
-- [ ] Lineup widget + viewer count on /live
-- [ ] Password rotation flow at /admin/settings (track this — admin123 is weak)
+- [x] SSE endpoint at /api/live/stream emitting state-version diffs
+- [x] Frontend live shopping rail on /live (LiveDashboard subscribes to SSE)
+- [x] Editorial off-air state with countdown to next SCHEDULED show + replays grid
+- [x] Lineup widget with client-ticked Now/Up Next/Done state per segment
+- [ ] **Phase 2 deferred:** Viewer count badge (needs Cloudflare Analytics API)
+- [ ] **Phase 2:** Password rotation flow at /admin/settings — admin123 is weak
+
+Operational flow (rehearsal recipe for first event):
+1. Admin signs in at /admin
+2. Create brands (Tony Visions, etc.) and products under each brand
+3. Create a Show tied to the Cloudflare Live Input UID, status SCHEDULED
+4. Add ShowSegments — one per designer block (brand + start time + duration)
+5. Pre-pin products in /admin/shows/[id]/control while status is SCHEDULED (preview mode — pins are saved but don't surface on /live yet)
+6. Start OBS pushing to Cloudflare. Click "Go live" on the control page.
+7. Producer pins/unpins as the show progresses; /live updates within ~2s via SSE
+8. Click "End show" when broadcast wraps. Cloudflare auto-records the VOD which surfaces in the replays grid.
 
 Files in flight (all on main):
 - `prisma/schema.prisma` + migrations applied to Neon main branch
