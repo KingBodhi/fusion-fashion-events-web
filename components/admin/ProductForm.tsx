@@ -1,4 +1,5 @@
 import { AdminField, inputClass, textareaClass, selectClass } from "./AdminField";
+import { ImageUploader } from "./ImageUploader";
 
 export type ProductFormDefaults = {
   brand_id?: string;
@@ -123,14 +124,14 @@ export function ProductForm({
         </AdminField>
       </div>
 
-      <AdminField label="Image URLs" hint="One per line. First is primary.">
-        <textarea
-          name="image_urls"
-          rows={3}
-          defaultValue={defaults?.image_urls?.join("\n") ?? ""}
-          className={textareaClass}
-        />
-      </AdminField>
+      <ImageUploader
+        name="image_urls"
+        label="Product images"
+        hint="Drag in one or more files. First is the primary used in product cards and the shopping rail."
+        multiple
+        defaultUrls={defaults?.image_urls ?? []}
+        folder="products"
+      />
 
       <AdminField
         label="External URL"

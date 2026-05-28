@@ -1,4 +1,5 @@
 import { AdminField, inputClass, textareaClass } from "./AdminField";
+import { ImageUploader } from "./ImageUploader";
 
 export type BrandFormDefaults = {
   slug?: string;
@@ -67,22 +68,20 @@ export function BrandForm({
       </AdminField>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <AdminField label="Hero image URL" hint="Full bleed image for /brands/<slug>">
-          <input
-            type="url"
-            name="hero_image"
-            defaultValue={defaults?.hero_image ?? ""}
-            className={inputClass}
-          />
-        </AdminField>
-        <AdminField label="Logo URL" hint="Square logo for brand cards">
-          <input
-            type="url"
-            name="logo"
-            defaultValue={defaults?.logo ?? ""}
-            className={inputClass}
-          />
-        </AdminField>
+        <ImageUploader
+          name="hero_image"
+          label="Hero image"
+          hint="Full-bleed background for /brands/<slug>. Use a wide landscape shot."
+          defaultUrls={defaults?.hero_image ? [defaults.hero_image] : []}
+          folder="brands/hero"
+        />
+        <ImageUploader
+          name="logo"
+          label="Logo"
+          hint="Square mark for brand cards. PNG with transparency preferred."
+          defaultUrls={defaults?.logo ? [defaults.logo] : []}
+          folder="brands/logo"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
