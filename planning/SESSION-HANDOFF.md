@@ -6,9 +6,12 @@
 
 ---
 
-## TL;DR — Where we are right now
+## TL;DR — Where we are right now (updated 2026-05-28)
 
-Phase 1 (broadcast hub + Vercel deploy) is **shipped**. Live at:
+**Phase 1** (broadcast hub + Vercel deploy) is shipped.
+**Phase 1.5** (live shopping foundation) is **~70% complete** — auth + schema + brands/products CRUD + shows + segments + live pinning dashboard all built and deployed. Remaining: SSE endpoint + frontend live shopping rail + editorial off-air state + lineup widget + viewer count.
+
+Phase 1 originally lived at:
 
 - **Production:** https://fusion-fashion-events-web.vercel.app
 - **Live page:** https://fusion-fashion-events-web.vercel.app/live
@@ -56,7 +59,37 @@ This is a **multi-week build**. Don't rush ahead of the phasing.
 - [x] Simulcast destination rail + brand CTA rail (placeholder data)
 - [x] Nav updated with "Live" entry
 
-### Phase 2 — Per-brand pages + simulcast (NEXT)
+### Phase 1.5 — Live shopping platform (IN PROGRESS)
+
+- [x] Neon Postgres via Vercel Marketplace (`neon-pink-envelope` resource)
+- [x] Prisma 6 schema: Brand, Product, Show, ShowSegment, PinnedProduct, AdminUser + enums
+- [x] DIY JWT admin auth (bcryptjs + jose), httpOnly cookie, 7-day expiry
+- [x] proxy.ts (Next 16 renamed from middleware.ts) protecting /admin/*
+- [x] First OWNER admin seeded: `bodhimgmt@gmail.com` / `admin123` (ROTATE THIS)
+- [x] Route group split: app/(site)/ owns the public chrome; app/admin/ has its own shell
+- [x] Admin: brands CRUD + products CRUD with status enum (DRAFT/ACTIVE/SOLD_OUT/ARCHIVED)
+- [x] Admin: shows + segments (per-brand lineup blocks)
+- [x] Admin: /admin/shows/[id]/control — live pinning cockpit (mobile-first)
+- [ ] SSE endpoint at /api/live/[showId]/stream emitting pin changes
+- [ ] Frontend live shopping rail on /live (subscribes to SSE)
+- [ ] Editorial off-air state with countdown + replays grid
+- [ ] Lineup widget + viewer count on /live
+- [ ] Password rotation flow at /admin/settings (track this — admin123 is weak)
+
+Files in flight (all on main):
+- `prisma/schema.prisma` + migrations applied to Neon main branch
+- `lib/{auth,session,prisma}.ts`, `lib/actions/{brands,products,shows,pins}.ts`
+- `app/admin/{layout,page,login,brands,products,shows}/...`
+- `components/admin/{AdminField,BrandForm,ProductForm,ShowForm}.tsx`
+- `proxy.ts` (Next 16: export name is `proxy`, no `config` export allowed)
+
+Operator notes for next session:
+- Vercel CLI 41.4.1 from Flox is too old for the deploy endpoint. Always use `npx vercel@latest`.
+- Prisma 7 broke datasource conventions; we pinned Prisma 6 for stability.
+- `vercel env add` with `--sensitive` doesn't accept `development` target. Use API directly for stubborn cases.
+- `.env.local` has come back from `vercel env pull` with literal `\n` appended to some values; strip on each pull.
+
+### Phase 2 — Per-brand pages + simulcast (after 1.5)
 
 - [ ] Collect simulcast stream keys for YouTube / IG / FB / TikTok (see workflows below)
 - [ ] POST each to Cloudflare via `createSimulcastOutput()` in `lib/cloudflare-stream.ts`
