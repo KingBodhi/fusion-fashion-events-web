@@ -44,8 +44,8 @@ export async function BrandCTARail() {
             href={`/brands/${brand.slug}`}
             className="group border border-border hover:border-accent bg-surface transition-colors block overflow-hidden"
           >
-            {brand.hero_image && (
-              <div className="relative aspect-[3/2] bg-black border-b border-border overflow-hidden">
+            <div className="relative aspect-[3/2] bg-black border-b border-border overflow-hidden">
+              {brand.hero_image ? (
                 <Image
                   src={brand.hero_image}
                   alt={brand.name}
@@ -54,8 +54,23 @@ export async function BrandCTARail() {
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   unoptimized
                 />
-              </div>
-            )}
+              ) : brand.logo ? (
+                <div className="h-full w-full flex items-center justify-center p-8">
+                  <Image
+                    src={brand.logo}
+                    alt={brand.name}
+                    width={240}
+                    height={120}
+                    className="max-h-full max-w-full object-contain opacity-90 group-hover:opacity-100 transition-opacity"
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <div className="h-full w-full flex items-center justify-center">
+                  <p className="font-display text-3xl text-muted-dark">{brand.name}</p>
+                </div>
+              )}
+            </div>
             <div className="p-6">
               <p className="font-label tracking-widest text-[10px] text-muted-dark uppercase mb-3">
                 Brand
