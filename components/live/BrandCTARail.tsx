@@ -55,13 +55,14 @@ export async function BrandCTARail() {
                   unoptimized
                 />
               ) : brand.logo ? (
-                <div className="h-full w-full flex items-center justify-center p-8">
+                <div className="h-full w-full flex items-center justify-center p-10">
                   <Image
                     src={brand.logo}
                     alt={brand.name}
                     width={240}
                     height={120}
-                    className="max-h-full max-w-full object-contain opacity-90 group-hover:opacity-100 transition-opacity"
+                    className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                    style={{ filter: "brightness(0) invert(1)" }}
                     unoptimized
                   />
                 </div>

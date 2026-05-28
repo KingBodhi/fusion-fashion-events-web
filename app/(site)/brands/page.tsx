@@ -71,14 +71,15 @@ export default async function BrandsDirectoryPage() {
                       unoptimized
                     />
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center">
+                    <div className="h-full w-full flex items-center justify-center p-10">
                       {b.logo ? (
                         <Image
                           src={b.logo}
                           alt={b.name}
-                          width={120}
+                          width={200}
                           height={120}
-                          className="object-contain opacity-80"
+                          className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                          style={{ filter: "brightness(0) invert(1)" }}
                           unoptimized
                         />
                       ) : (
